@@ -79,7 +79,7 @@ export class NewItem extends Component<any, any> {
     // check firmware dependency
     if (this.props.type === 'firmware') {
       if (this.state.minimumFirmwareVersion !== null) {
-        let firmwareDependencyExists = false;
+        firmwareDependencyExists = false;
         for (let i = 0; i < this.props.existingData.firmware.length; i++) {
           let firmware = this.props.existingData.firmware[i];
 

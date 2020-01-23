@@ -20,8 +20,8 @@ export class NewItem extends Component<any, any> {
       dongles: false,
       releaseLevel:1e7,
       minimumAppVersion: '',
-      minimumFirmwareVersion: '',
-      minimumBootloaderVersion: '',
+      minimumFirmwareVersion: null,
+      minimumBootloaderVersion: null,
       sha1Hash: '',
       downloadUrl: '',
       releaseNotesEN: '',
@@ -196,13 +196,24 @@ export class NewItem extends Component<any, any> {
             {this.props.type === 'firmware' && <tr>
               <th>Requires Firmware Version</th>
               <td><input value={this.state.minimumFirmwareVersion} onChange={(e) => {
+                if (e.target.value == "") {
+                  this.setState({minimumFirmwareVersion: null})
+                  return
+                }
+
                 this.setState({minimumFirmwareVersion: e.target.value});
               }} style={{backgroundColor: getSemverColor(this.state.minimumFirmwareVersion) }}/></td>
             </tr>
             }
             <tr>
               <th>Requires Bootloader Version</th>
-              <td><input value={this.state.minimumBootloaderVersion} onChange={(e) => { this.setState({minimumBootloaderVersion: e.target.value}); }} style={{backgroundColor: getSemverColor(this.state.minimumBootloaderVersion) }} /></td>
+              <td><input value={this.state.minimumBootloaderVersion} onChange={(e) => {
+                if (e.target.value == "") {
+                  this.setState({minimumBootloaderVersion: null})
+                  return
+                }
+
+                this.setState({minimumBootloaderVersion: e.target.value}); }} style={{backgroundColor: getSemverColor(this.state.minimumBootloaderVersion) }} /></td>
             </tr>
             <tr>
               <th>Sha1 Hash</th>

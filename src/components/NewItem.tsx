@@ -174,8 +174,9 @@ export class NewItem extends Component<any, any> {
             <tr>
               <th>Release Level</th>
               <td>
-                <input type="radio" name={"releaseLevel"} checked={this.state.releaseLevel === 0}   onChange={(val) => { this.setState({releaseLevel: 0}); }} />Public<br />
-                <input type="radio" name={"releaseLevel"} checked={this.state.releaseLevel === 100} onChange={(val) => { this.setState({releaseLevel: 100}); }} />Beta<br />
+                <input type="radio" name={"releaseLevel"} checked={this.state.releaseLevel === 0}    onChange={(val) => { this.setState({releaseLevel: 0}); }} />Public<br />
+                <input type="radio" name={"releaseLevel"} checked={this.state.releaseLevel === 50}  onChange={(val) => { this.setState({releaseLevel: 50}); }} />Beta<br />
+                <input type="radio" name={"releaseLevel"} checked={this.state.releaseLevel === 100} onChange={(val) => { this.setState({releaseLevel: 100}); }} />Alpha<br />
                 <input type="radio" name={"releaseLevel"} checked={this.state.releaseLevel > 100}   onChange={(val) => { this.setState({releaseLevel: 1e7}); }} />Nobody
               </td>
             </tr>

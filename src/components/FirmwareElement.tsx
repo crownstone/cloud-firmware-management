@@ -77,11 +77,20 @@ export function Bootloaders({data, selectCallback, addBootloader}) {
 
 function ItemRow({data, shaded, isFirmware, selectCallback}) {
   let releaseLevel = getReleaseLevel(data.releaseLevel)
+  let releaseLevelColor = "#fff"
+  switch (releaseLevel) {
+    case RELEASE_LEVELS.PUBLIC:
+      releaseLevelColor = colors.white.hex; break;
+    case RELEASE_LEVELS.BETA:
+      releaseLevelColor = colors.menuTextSelected.hex; break;
+    case RELEASE_LEVELS.ALPHA:
+      releaseLevelColor = colors.csOrange.hex; break;
+    case RELEASE_LEVELS.NOBODY:
+      releaseLevelColor = colors.red.hex; break;
+  }
 
   return (
-    <tr key={data._id} style={{backgroundColor: releaseLevel == RELEASE_LEVELS.NOBODY ? colors.csOrange.hex : (shaded ?
-        releaseLevel == RELEASE_LEVELS.BETA ? colors.menuTextSelected.rgba(0.6) :'#ddd' :
-        releaseLevel == RELEASE_LEVELS.BETA ? colors.menuTextSelected.rgba(0.3) :"#fff")}}>
+    <tr key={data._id} style={{backgroundColor: releaseLevelColor}}>
       <td>{data.version}</td>
       <td>{getDescriptiveHardwareString(data.supportedHardwareVersions)}</td>
       <td>{data.minimumAppVersion}</td>
@@ -137,8 +146,11 @@ export function getReleaseLevel(releaseLevel) {
   if (releaseLevel == 0) {
     return RELEASE_LEVELS.PUBLIC;
   }
-  else if (releaseLevel < 1e6) {
+  else if (releaseLevel === 50) {
     return RELEASE_LEVELS.BETA;
+  }
+  else if (releaseLevel === 100) {
+    return RELEASE_LEVELS.ALPHA;
   }
   else {
     return RELEASE_LEVELS.NOBODY
@@ -147,6 +159,7 @@ export function getReleaseLevel(releaseLevel) {
 
 export const RELEASE_LEVELS = {
   PUBLIC: "Public",
+  ALPHA: "ALPHA",
   BETA: "BETA",
   NOBODY: "NOBODY"
 }

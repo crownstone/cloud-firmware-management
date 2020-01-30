@@ -66,11 +66,16 @@ export function FocusItem({allElements, id, type, close, refresh}) {
         To Public
       </Button>
       <Button variant="contained" style={{backgroundColor: colors.menuTextSelected.hex, color: colors.white.hex, margin:20}}  onClick={() => {
-        toLevel(data, type, 100, refresh);
+        toLevel(data, type, 50, refresh);
       }}>
         To BETA
       </Button>
       <Button variant="contained" style={{backgroundColor: colors.csOrange.hex, color: colors.white.hex, margin:20}}  onClick={() => {
+        toLevel(data, type, 100, refresh);
+      }}>
+        To ALPHA
+      </Button>
+      <Button variant="contained" style={{backgroundColor: colors.red.hex, color: colors.white.hex, margin:20}}  onClick={() => {
         toLevel(data, type, 1e7, refresh);
       }}>
         REVOKE

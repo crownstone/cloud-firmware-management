@@ -36,7 +36,7 @@ export class NewItem extends Component<any, any> {
 
   release() {
     let hardwareHasBeenChosen = false;
-    if (this.state.plugs || this.state.builtinZero || this.state.builtinOne || this.state.guidestones || this.state.USB) {
+    if (this.state.plugs || this.state.builtinZero || this.state.builtinOne || this.state.guidestones || this.state.dongles) {
       hardwareHasBeenChosen = true;
     }
 
@@ -136,7 +136,7 @@ export class NewItem extends Component<any, any> {
       if (this.state.builtinZero) { supportedHardware = [...supportedHardware, ...hardwareVersions.util.getAllBuiltIns()] }
       if (this.state.builtinOne)  { supportedHardware = [...supportedHardware, ...hardwareVersions.util.getAllBuiltInOnes()] }
       if (this.state.guidestones) { supportedHardware = [...supportedHardware, ...hardwareVersions.util.getAllGuideStones()] }
-      if (this.state.USB)         { supportedHardware = [...supportedHardware, ...hardwareVersions.util.getAllDongles()] }
+      if (this.state.dongles)     { supportedHardware = [...supportedHardware, ...hardwareVersions.util.getAllDongles()] }
 
       let dataToSend = {
         ...this.state,

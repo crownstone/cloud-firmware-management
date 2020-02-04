@@ -3,7 +3,6 @@ import fetch from "isomorphic-unfetch"
 import {Bootloaders, Firmwares} from "../src/components/FirmwareElement";
 import {colors} from "../src/util/colors";
 import {FocusItem} from "../src/components/FocusItem";
-import {Button} from "@material-ui/core";
 import {NewItem} from "../src/components/NewItem";
 
 class IndexPage extends Component<any, any> {
@@ -23,6 +22,7 @@ class IndexPage extends Component<any, any> {
       firmwares: props.firmwares,
       bootloaders: props.bootloaders,
       selectedId: null,
+      basedOnId: null,
       selectedType: null,
       createNew: false,
       createNewType: null,
@@ -30,7 +30,7 @@ class IndexPage extends Component<any, any> {
   }
 
   async _refreshData() {
-    console.log("REFRESHIGN")
+    console.log("REFRESHING")
     const firmwareRequest = await fetch('http://localhost:3000/api/getFirmwares')
     const firmwareData = await firmwareRequest.json()
     const bootloaderRequest = await fetch('http://localhost:3000/api/getBootloaders')
@@ -44,7 +44,8 @@ class IndexPage extends Component<any, any> {
       <div>
         <div
           style={{
-            width:'100%', height:'100%',
+            zIndex:1e6,
+            width:'100%', height: 2000,
             position:'absolute', top:0, left:0,
             backgroundColor: colors.csBlue.rgba(0.4),
             display: this.state.selectedId === null ? 'none' : 'block'}}
@@ -55,16 +56,17 @@ class IndexPage extends Component<any, any> {
             allElements={this.state.selectedType === 'firmware' ? this.state.firmwares : this.state.bootloaders}
             id={this.state.selectedId}
             type={this.state.selectedType}
-            close={() => { this.setState({selectedId: null})}}
+            close={() => { this.setState({selectedId: null, basedOnId: null})}}
             refresh={() => { this._refreshData() }}
           />}
         </div>
-        <div style={{width:'100%', height:'100%', position:'absolute', top:0, left:0, backgroundColor: colors.csBlue.rgba(0.4), display: this.state.createNew  ? 'block' : "none"}}>
+        <div style={{zIndex:1e6,width:'100%',  height: 2000, position:'absolute', top:0, left:0, backgroundColor: colors.csBlue.rgba(0.4), display: this.state.createNew  ? 'block' : "none"}}>
           { this.state.createNew &&
           <NewItem
             type={this.state.createNewType}
             existingData={{firmware: this.state.firmwares, bootloader: this.state.bootloaders }}
-            close={() => { this.setState({createNew: false, createNewType:null})}}
+            basedOnId={ this.state.basedOnId }
+            close={() => { this.setState({createNew: false, createNewType: null, basedOnId: null})}}
             refresh={() => { this._refreshData() }}
           />}
         </div>
@@ -77,7 +79,11 @@ class IndexPage extends Component<any, any> {
               addFirmare={() => { this.setState({createNew: true, createNewType:'firmware'})}}
               selectCallback={(id) => {
                 this.setState({selectedId: id, selectedType: 'firmware'})
-              }} />
+              }}
+              copyCallback={(id) => {
+                this.setState({createNew: true, basedOnId: id, createNewType:'firmware'})
+              }}
+            />
           </div>
           <br/>
           <br/>
@@ -89,7 +95,11 @@ class IndexPage extends Component<any, any> {
               addBootloader={() => { this.setState({createNew: true, createNewType:'bootloader'})}}
               selectCallback={(id) => {
                 this.setState({selectedId: id, selectedType: 'bootloader'})
-              }} />
+              }}
+              copyCallback={(id) => {
+                this.setState({createNew: true, basedOnId: id, createNewType:'bootloader'})
+              }}
+            />
           </div>
         </div>
       </div>

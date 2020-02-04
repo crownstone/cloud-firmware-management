@@ -14,7 +14,7 @@ export const tableStyle = {
   padding:10
 }
 
-export function Firmwares({data, selectCallback, addFirmare}) {
+export function Firmwares({data, selectCallback, copyCallback, addFirmare}) {
   let count = 0;
   return (
     <table style={tableStyle} cellPadding={10}>
@@ -29,8 +29,9 @@ export function Firmwares({data, selectCallback, addFirmare}) {
           <th>Release Notes</th>
           <th>Release Level</th>
           <th></th>
+          <th></th>
         </tr>
-        { data.map((firmware) => { count++; return ItemRow({data: firmware, shaded: count % 2, isFirmware:true, selectCallback: selectCallback}); }) }
+        { data.map((firmware) => { count++; return ItemRow({data: firmware, shaded: count % 2, isFirmware:true, selectCallback: selectCallback, copyCallback: copyCallback}); }) }
         <tr>
           <td colSpan={9}>
             <div style={{textAlign:'right'}}>
@@ -45,7 +46,7 @@ export function Firmwares({data, selectCallback, addFirmare}) {
   )
 }
 
-export function Bootloaders({data, selectCallback, addBootloader}) {
+export function Bootloaders({data, selectCallback, addBootloader, copyCallback}) {
   let count = 0;
   return (
     <table style={tableStyle} cellPadding={10}>
@@ -60,7 +61,7 @@ export function Bootloaders({data, selectCallback, addBootloader}) {
           <th>Release Level</th>
           <th>Change</th>
         </tr>
-        { data.map((firmware) => { count++; return ItemRow({data: firmware, shaded: count % 2, isFirmware:false, selectCallback: selectCallback}); }) }
+        { data.map((firmware) => { count++; return ItemRow({data: firmware, shaded: count % 2, isFirmware:false, selectCallback: selectCallback, copyCallback: copyCallback}); }) }
         <tr>
           <td colSpan={8}>
             <div style={{textAlign:'right'}}>
@@ -75,7 +76,7 @@ export function Bootloaders({data, selectCallback, addBootloader}) {
   )
 }
 
-function ItemRow({data, shaded, isFirmware, selectCallback}) {
+function ItemRow({data, shaded, isFirmware, selectCallback, copyCallback}) {
   let releaseLevel = getReleaseLevel(data.releaseLevel)
   let releaseLevelColor = "#fff"
   switch (releaseLevel) {
@@ -106,6 +107,14 @@ function ItemRow({data, shaded, isFirmware, selectCallback}) {
           onClick={() => { selectCallback(data._id)}}
         >
           Edit
+        </Button>
+      </td><td>
+        <Button
+          variant="contained"
+          style={{backgroundColor: colors.menuTextSelected.hex, color: colors.white.hex}}
+          onClick={() => { copyCallback(data._id)}}
+        >
+          Copy
         </Button>
       </td>
     </tr>

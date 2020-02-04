@@ -11,7 +11,7 @@ export class NewItem extends Component<any, any> {
   constructor(props) {
     super(props);
 
-    this.state = {
+    let initialState = {
       version: "",
       plugs: false,
       builtinZero: false,
@@ -30,7 +30,34 @@ export class NewItem extends Component<any, any> {
       releaseNotesFR: '',
       releaseNotesES: '',
       releaseNotesIT: '',
+    };
+
+    let availableItems = props.existingData[props.type];
+    let basedOnId = props.basedOnId;
+    if (basedOnId && Array.isArray(availableItems)) {
+      for (let i = 0; i< availableItems.length; i++) {
+        if (availableItems[i]._id === basedOnId) {
+          let base = availableItems[i];
+          initialState.version                  = base.version || null;
+          initialState.releaseLevel             = 1e7;
+          initialState.minimumAppVersion        = base.minimumAppVersion || null;
+          initialState.minimumFirmwareVersion   = base.dependsOnFirmwareVersion || null;
+          initialState.minimumBootloaderVersion = base.dependsOnBootloaderVersion || null;
+          initialState.sha1Hash                 = base.sha1Hash || null;
+          initialState.downloadUrl              = base.downloadUrl || null;
+          initialState.releaseNotesEN           = base.releaseNotes.en || null;
+          initialState.releaseNotesNL           = base.releaseNotes.nl || null;
+          initialState.releaseNotesDE           = base.releaseNotes.de || null;
+          initialState.releaseNotesFR           = base.releaseNotes.fr || null;
+          initialState.releaseNotesES           = base.releaseNotes.es || null;
+          initialState.releaseNotesIT           = base.releaseNotes.it || null;
+          break;
+        }
+      }
     }
+
+
+    this.state = initialState;
   }
 
 
@@ -196,7 +223,7 @@ export class NewItem extends Component<any, any> {
             </tr>
             {this.props.type === 'firmware' && <tr>
               <th>Requires Firmware Version</th>
-              <td><input value={this.state.minimumFirmwareVersion} onChange={(e) => {
+              <td><input value={this.state.minimumFirmwareVersion || ""} onChange={(e) => {
                 if (e.target.value == "") {
                   this.setState({minimumFirmwareVersion: null})
                   return
@@ -208,7 +235,7 @@ export class NewItem extends Component<any, any> {
             }
             <tr>
               <th>Requires Bootloader Version</th>
-              <td><input value={this.state.minimumBootloaderVersion} onChange={(e) => {
+              <td><input value={this.state.minimumBootloaderVersion || ""} onChange={(e) => {
                 if (e.target.value == "") {
                   this.setState({minimumBootloaderVersion: null})
                   return
@@ -218,36 +245,36 @@ export class NewItem extends Component<any, any> {
             </tr>
             <tr>
               <th>Sha1 Hash</th>
-              <td><input value={this.state.sha1Hash} onChange={(e) => { this.setState({sha1Hash: e.target.value}); }} /></td>
+              <td><input value={this.state.sha1Hash || ""} onChange={(e) => { this.setState({sha1Hash: e.target.value}); }} /></td>
             </tr>
             <tr>
               <th>Download URL</th>
-              <td><input value={this.state.downloadUrl} onChange={(e) => { this.setState({downloadUrl: e.target.value}); }} /></td>
+              <td><input value={this.state.downloadUrl || ""} onChange={(e) => { this.setState({downloadUrl: e.target.value}); }} /></td>
             </tr>
             <tr>
               <th>Release Notes English</th>
-              <td><input value={this.state.releaseNotesEN} onChange={(e) => { this.setState({releaseNotesEN: e.target.value}); }} /></td>
+              <td><textarea style={{width:300, height:100}} value={this.state.releaseNotesEN || ""} onChange={(e) => { this.setState({releaseNotesEN: e.target.value}); }} /></td>
             </tr>
             <tr>
               <th>Release Notes Nederlands</th>
-              <td><input value={this.state.releaseNotesNL} onChange={(e) => { this.setState({releaseNotesNL: e.target.value}); }} /></td>
+              <td><textarea style={{width:300, height:100}} value={this.state.releaseNotesNL} onChange={(e) => { this.setState({releaseNotesNL: e.target.value}); }} /></td>
             </tr>
-            <tr>
-              <th>Release Notes Deutsch</th>
-              <td><input value={this.state.releaseNotesDE} onChange={(e) => { this.setState({releaseNotesDE: e.target.value}); }} /></td>
-            </tr>
-            <tr>
-              <th>Release Notes Franzosisch</th>
-              <td><input value={this.state.releaseNotesFR} onChange={(e) => { this.setState({releaseNotesFR: e.target.value}); }} /></td>
-            </tr>
-            <tr>
-              <th>Release Notes Espanyol</th>
-              <td><input value={this.state.releaseNotesES} onChange={(e) => { this.setState({releaseNotesES: e.target.value}); }} /></td>
-            </tr>
-            <tr>
-              <th>Release Notes Italiano</th>
-              <td><input value={this.state.releaseNotesIT} onChange={(e) => { this.setState({releaseNotesIT: e.target.value}); }} /></td>
-            </tr>
+            {/*<tr>*/}
+            {/*  <th>Release Notes Deutsch</th>*/}
+            {/*  <td><input value={this.state.releaseNotesDE} onChange={(e) => { this.setState({releaseNotesDE: e.target.value}); }} /></td>*/}
+            {/*</tr>*/}
+            {/*<tr>*/}
+            {/*  <th>Release Notes Franzosisch</th>*/}
+            {/*  <td><input value={this.state.releaseNotesFR} onChange={(e) => { this.setState({releaseNotesFR: e.target.value}); }} /></td>*/}
+            {/*</tr>*/}
+            {/*<tr>*/}
+            {/*  <th>Release Notes Espanyol</th>*/}
+            {/*  <td><input value={this.state.releaseNotesES} onChange={(e) => { this.setState({releaseNotesES: e.target.value}); }} /></td>*/}
+            {/*</tr>*/}
+            {/*<tr>*/}
+            {/*  <th>Release Notes Italiano</th>*/}
+            {/*  <td><input value={this.state.releaseNotesIT} onChange={(e) => { this.setState({releaseNotesIT: e.target.value}); }} /></td>*/}
+            {/*</tr>*/}
             </tbody>
           </table>
           <Button variant="contained" style={{backgroundColor: colors.red.hex, color: colors.white.hex, width: 500}}  onClick={() => { this.release() }}>

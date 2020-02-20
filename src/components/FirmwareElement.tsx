@@ -1,7 +1,9 @@
 import {hardwareVersions} from "../util/HardwareVersions";
 import {colors} from "../util/colors";
 import {Button} from "@material-ui/core";
-
+let oldPlugArray = [...hardwareVersions.util.getAllPlugs()];
+oldPlugArray.pop();
+let oldPlugs            = oldPlugArray;
 let allPlugs            = hardwareVersions.util.getAllPlugs();
 let allBuiltIns         = hardwareVersions.util.getAllBuiltIns();
 let allBuiltInOnes      = hardwareVersions.util.getAllBuiltInOnes();
@@ -131,21 +133,54 @@ function hasValues(candidate, compareWith) {
   }
   return true
 }
+function hasValuesDestructive(candidate, compareWith) {
+  let mapOfCandidate = {};
+  let mapOfSource = {};
+  let result = true;
+  for (let i = 0; i < candidate.length; i++) { mapOfCandidate[candidate[i]] = true}
+  for (let i = 0; i < compareWith.length; i++) {
+    mapOfSource[compareWith[i]] = true;
+    if (mapOfCandidate[compareWith[i]] === undefined) {
+      result = false
+    }
+  }
+
+
+  if (result === true) {
+    for (let i = candidate.length-1; i >= 0; i--) {
+      if (mapOfSource[candidate[i]] !== undefined) {
+        candidate.splice(i,1);
+      }
+    }
+  }
+
+
+  return result;
+}
 
 export function getDescriptiveHardwareString(supportedHardwareVersions) {
   let hardwareArray = []
+  let lossyCopy = [];
+
   if (hasValues(supportedHardwareVersions, all)) { hardwareArray = ['All devices']; }
   else {
-    if (hasValues(supportedHardwareVersions, allPlugs      )) { hardwareArray.push('Plugs'); }
-    if (hasValues(supportedHardwareVersions, allBuiltIns   )) { hardwareArray.push('Builtin Zero'); }
-    if (hasValues(supportedHardwareVersions, allBuiltInOnes)) { hardwareArray.push('Builtin One'); }
-    if (hasValues(supportedHardwareVersions, allGuideStones)) { hardwareArray.push('Guidestones'); }
-    if (hasValues(supportedHardwareVersions, allDongles    )) { hardwareArray.push('USB'); }
-  }
-  if (hardwareArray.length == 0) {
-    hardwareArray = supportedHardwareVersions;
+    lossyCopy = [...supportedHardwareVersions];
+    if      (hasValuesDestructive(lossyCopy, allPlugs ))      { hardwareArray.push('Plugs'); }
+    else if (hasValuesDestructive(lossyCopy, oldPlugs ))      { hardwareArray.push('Plugs(ex G)'); }
+    if      (hasValuesDestructive(lossyCopy, allBuiltIns   )) { hardwareArray.push('Builtin Zero'); }
+    if      (hasValuesDestructive(lossyCopy, allBuiltInOnes)) { hardwareArray.push('Builtin One'); }
+    if      (hasValuesDestructive(lossyCopy, allGuideStones)) { hardwareArray.push('Guidestones'); }
+    if      (hasValuesDestructive(lossyCopy, allDongles    )) { hardwareArray.push('USB'); }
   }
   let hardwareString = hardwareArray.sort().join(", ");
+  if (lossyCopy.length !== 0) {
+    if (hardwareArray.length == 0) {
+      hardwareString = lossyCopy.sort().join(", ");
+    }
+    else {
+      hardwareString += " and " + lossyCopy.sort().join(", ");
+    }
+  }
   return hardwareString;
 }
 

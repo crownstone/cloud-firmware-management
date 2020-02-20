@@ -22,7 +22,7 @@ export class NewItem extends Component<any, any> {
       minimumAppVersion: '',
       minimumFirmwareVersion: null,
       minimumBootloaderVersion: null,
-      sha1Hash: '',
+      sha1hash: '',
       downloadUrl: '',
       releaseNotesEN: '',
       releaseNotesNL: '',
@@ -38,19 +38,20 @@ export class NewItem extends Component<any, any> {
       for (let i = 0; i< availableItems.length; i++) {
         if (availableItems[i]._id === basedOnId) {
           let base = availableItems[i];
+
           initialState.version                  = base.version || null;
           initialState.releaseLevel             = 1e7;
           initialState.minimumAppVersion        = base.minimumAppVersion || null;
           initialState.minimumFirmwareVersion   = base.dependsOnFirmwareVersion || null;
           initialState.minimumBootloaderVersion = base.dependsOnBootloaderVersion || null;
-          initialState.sha1Hash                 = base.sha1Hash || null;
+          initialState.sha1hash                 = base.sha1hash || null;
           initialState.downloadUrl              = base.downloadUrl || null;
-          initialState.releaseNotesEN           = base.releaseNotes.en || null;
-          initialState.releaseNotesNL           = base.releaseNotes.nl || null;
-          initialState.releaseNotesDE           = base.releaseNotes.de || null;
-          initialState.releaseNotesFR           = base.releaseNotes.fr || null;
-          initialState.releaseNotesES           = base.releaseNotes.es || null;
-          initialState.releaseNotesIT           = base.releaseNotes.it || null;
+          initialState.releaseNotesEN           = base.releaseNotes.en || '';
+          initialState.releaseNotesNL           = base.releaseNotes.nl || '';
+          initialState.releaseNotesDE           = base.releaseNotes.de || '';
+          initialState.releaseNotesFR           = base.releaseNotes.fr || '';
+          initialState.releaseNotesES           = base.releaseNotes.es || '';
+          initialState.releaseNotesIT           = base.releaseNotes.it || '';
           break;
         }
       }
@@ -145,7 +146,7 @@ export class NewItem extends Component<any, any> {
     else if (!this.state.version) {
       alert("HEY! Pick a version. Duh....");
     }
-    else if (!this.state.sha1Hash) {
+    else if (!this.state.sha1hash) {
       alert("NO! The hash is required. Duh....");
     }
     else if (!this.state.downloadUrl) {
@@ -245,7 +246,7 @@ export class NewItem extends Component<any, any> {
             </tr>
             <tr>
               <th>Sha1 Hash</th>
-              <td><input value={this.state.sha1Hash || ""} onChange={(e) => { this.setState({sha1Hash: e.target.value}); }} /></td>
+              <td><input value={this.state.sha1hash || ""} onChange={(e) => { this.setState({sha1hash: e.target.value}); }} /></td>
             </tr>
             <tr>
               <th>Download URL</th>

@@ -23,7 +23,7 @@ export default (req, res) => {
         minimumAppVersion:          data.minimumAppVersion,
         dependsOnFirmwareVersion:   data.minimumFirmwareVersion,
         dependsOnBootloaderVersion: data.minimumBootloaderVersion,
-        sha1hash:                   data.sha1Hash,
+        sha1hash:                   data.sha1hash,
         downloadUrl:                data.downloadUrl,
         releaseNotes: {
           en : data.releaseNotesEN,

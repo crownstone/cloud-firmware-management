@@ -12,6 +12,7 @@ let allDongles          = hardwareVersions.util.getAllDongles();
 let all                 = hardwareVersions.util.getAllVersions();
 
 export const tableStyle = {
+  width:'100%',
   borderSpacing:0,
   padding:10
 }

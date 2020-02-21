@@ -5,6 +5,18 @@ import {Button} from "@material-ui/core";
 import {postData} from "../util/FetchUtil";
 import {checkSemVer, hardwareVersions} from "../util/HardwareVersions";
 
+let oldPlugArray = [...hardwareVersions.util.getAllPlugs()];
+oldPlugArray.pop();
+let oldPlugs            = oldPlugArray;
+let allPlugs            = hardwareVersions.util.getAllPlugs();
+let allBuiltIns         = hardwareVersions.util.getAllBuiltIns();
+let allBuiltInOnes      = hardwareVersions.util.getAllBuiltInOnes();
+let allGuideStones      = hardwareVersions.util.getAllGuideStones();
+let allDongles          = hardwareVersions.util.getAllDongles();
+let all                 = hardwareVersions.util.getAllVersions();
+
+
+
 
 export class NewItem extends Component<any, any> {
 
@@ -38,7 +50,6 @@ export class NewItem extends Component<any, any> {
       for (let i = 0; i< availableItems.length; i++) {
         if (availableItems[i]._id === basedOnId) {
           let base = availableItems[i];
-
           initialState.version                  = base.version || null;
           initialState.releaseLevel             = 1e7;
           initialState.minimumAppVersion        = base.minimumAppVersion || null;
@@ -61,6 +72,31 @@ export class NewItem extends Component<any, any> {
     this.state = initialState;
   }
 
+  _generateRequiredMap() {
+    let hardwareWithSupportedVersions = {}
+
+    if (this.state.plugs) {
+      allPlugs.forEach((hwVersion) => { hardwareWithSupportedVersions[hwVersion] = false; })
+    }
+
+    if (this.state.builtinZero) {
+      allBuiltIns.forEach((hwVersion) => { hardwareWithSupportedVersions[hwVersion] = false; })
+    }
+
+    if (this.state.builtinOne) {
+      allBuiltInOnes.forEach((hwVersion) => { hardwareWithSupportedVersions[hwVersion] = false; })
+    }
+
+    if (this.state.guidestones) {
+      allGuideStones.forEach((hwVersion) => { hardwareWithSupportedVersions[hwVersion] = false; })
+    }
+
+    if (this.state.dongles) {
+      allDongles.forEach((hwVersion) => { hardwareWithSupportedVersions[hwVersion] = false; })
+    }
+
+    return hardwareWithSupportedVersions;
+  }
 
   release() {
     let hardwareHasBeenChosen = false;
@@ -73,33 +109,27 @@ export class NewItem extends Component<any, any> {
 
     // check bootloader dependency
     if (this.state.minimumBootloaderVersion !== null) {
-      bootloaderDependencyExists = false;
-      for (let i = 0; i < this.props.existingData.bootloader.length; i++) {
-        let bootloader = this.props.existingData.bootloader[i];
-        if (bootloader.version === this.state.minimumBootloaderVersion && bootloader.releaseLevel <= this.state.releaseLevel) {
-          // check if this bootloader supports all the hardware types
-          let hardwareVersions = getDescriptiveHardwareString(bootloader.supportedHardwareVersions).split(", ");
-          let hardwareCheckPassed = true;
-          if (this.state.plugs && hardwareVersions.indexOf('Plugs') == -1) {
-            hardwareCheckPassed = false;
-          }
-          if (this.state.builtinZero && hardwareVersions.indexOf('Builtin Zero') == -1) {
-            hardwareCheckPassed = false;
-          }
-          if (this.state.builtinOne && hardwareVersions.indexOf('Builtin One') == -1) {
-            hardwareCheckPassed = false;
-          }
-          if (this.state.guidestones && hardwareVersions.indexOf('Guidestones') == -1) {
-            hardwareCheckPassed = false;
-          }
-          if (this.state.dongles && hardwareVersions.indexOf('USB') == -1) {
-            hardwareCheckPassed = false;
-          }
+      let hardwareItems = this._generateRequiredMap();
+      let requiredVersions = Object.keys(hardwareItems);
 
-          if (hardwareCheckPassed) {
-            bootloaderDependencyExists = true;
-            break;
+      for (let i = 0; i < requiredVersions.length; i++) {
+        let version = requiredVersions[i];
+        for (let k = 0; k < this.props.existingData.bootloader.length; k++) {
+          let bootloader = this.props.existingData.bootloader[k];
+          if (bootloader.version === this.state.minimumBootloaderVersion && bootloader.releaseLevel <= this.state.releaseLevel) {
+            if (bootloader.supportedHardwareVersions.indexOf(version) !== -1) {
+              hardwareItems[version] = true;
+              break;
+            }
           }
+        }
+      }
+
+      let bootloaderDependencyExists = true;
+      for (let i = 0; i < requiredVersions.length; i++) {
+        if (hardwareItems[requiredVersions[i]] === false) {
+          bootloaderDependencyExists = false;
+          break;
         }
       }
     }
@@ -107,34 +137,27 @@ export class NewItem extends Component<any, any> {
     // check firmware dependency
     if (this.props.type === 'firmware') {
       if (this.state.minimumFirmwareVersion !== null) {
-        firmwareDependencyExists = false;
-        for (let i = 0; i < this.props.existingData.firmware.length; i++) {
-          let firmware = this.props.existingData.firmware[i];
+        let hardwareItems = this._generateRequiredMap();
+        let requiredVersions = Object.keys(hardwareItems);
 
-          if (firmware.version === this.state.minimumFirmwareVersion && firmware.releaseLevel <= this.state.releaseLevel) {
-            // check if this bootloader supports all the hardware types
-            let hardwareVersions = getDescriptiveHardwareString(firmware.supportedHardwareVersions).split(", ");
-            let hardwareCheckPassed = true;
-            if (this.state.plugs && hardwareVersions.indexOf('Plugs') == -1) {
-              hardwareCheckPassed = false;
+        for (let i = 0; i < requiredVersions.length; i++) {
+          let version = requiredVersions[i];
+          for (let j = 0; j < this.props.existingData.firmware.length; j++) {
+            let firmware = this.props.existingData.firmware[j];
+            if (firmware.version === this.state.minimumBootloaderVersion && firmware.releaseLevel <= this.state.releaseLevel) {
+              if (firmware.supportedHardwareVersions.indexOf(version) !== -1) {
+                hardwareItems[version] = true;
+                break;
+              }
             }
-            if (this.state.builtinZero && hardwareVersions.indexOf('Builtin Zero') == -1) {
-              hardwareCheckPassed = false;
-            }
-            if (this.state.builtinOne && hardwareVersions.indexOf('Builtin One') == -1) {
-              hardwareCheckPassed = false;
-            }
-            if (this.state.guidestones && hardwareVersions.indexOf('Guidestones') == -1) {
-              hardwareCheckPassed = false;
-            }
-            if (this.state.dongles && hardwareVersions.indexOf('USB') == -1) {
-              hardwareCheckPassed = false;
-            }
+          }
+        }
 
-            if (hardwareCheckPassed) {
-              firmwareDependencyExists = true;
-              break;
-            }
+        let firmwareDependencyExists = true;
+        for (let i = 0; i < requiredVersions.length; i++) {
+          if (hardwareItems[requiredVersions[i]] === false) {
+            firmwareDependencyExists = false;
+            break;
           }
         }
       }
@@ -182,7 +205,6 @@ export class NewItem extends Component<any, any> {
   }
 
   render() {
-
     let getSemverColor = (val) : string => {
       if (!val) { return colors.white.hex; }
       return checkSemVer(val) ? colors.green.hex : colors.csOrange.hex;
@@ -191,8 +213,8 @@ export class NewItem extends Component<any, any> {
     return (
       <div style={{margin:'auto', marginTop: 75, padding:20, width: 1000, height: 875, borderRadius: 20, backgroundColor: colors.white.hex, textAlign:'center'}}>
         <h1>{"New " + this.props.type}</h1>
-        <div style={{display:'inline-block', textAlign:'left'}}>
-          <table style={tableStyle} cellPadding={10}>
+        <div style={{display:'block', textAlign:'left'}}>
+          <table className={'newTableItem'} style={tableStyle} cellPadding={10}>
             <tbody>
             <tr>
               <th>Version</th>
@@ -202,10 +224,10 @@ export class NewItem extends Component<any, any> {
             <tr>
               <th>Release Level</th>
               <td>
-                <input type="radio" name={"releaseLevel"} checked={this.state.releaseLevel === 0}    onChange={(val) => { this.setState({releaseLevel: 0}); }} />Public<br />
-                <input type="radio" name={"releaseLevel"} checked={this.state.releaseLevel === 50}  onChange={(val) => { this.setState({releaseLevel: 50}); }} />Beta<br />
+                <input type="radio" name={"releaseLevel"} checked={this.state.releaseLevel ===  0 } onChange={(val) => { this.setState({releaseLevel: 0});   }} />Public<br />
+                <input type="radio" name={"releaseLevel"} checked={this.state.releaseLevel ===  50} onChange={(val) => { this.setState({releaseLevel: 50});  }} />Beta<br />
                 <input type="radio" name={"releaseLevel"} checked={this.state.releaseLevel === 100} onChange={(val) => { this.setState({releaseLevel: 100}); }} />Alpha<br />
-                <input type="radio" name={"releaseLevel"} checked={this.state.releaseLevel > 100}   onChange={(val) => { this.setState({releaseLevel: 1e7}); }} />Nobody
+                <input type="radio" name={"releaseLevel"} checked={this.state.releaseLevel  >  100} onChange={(val) => { this.setState({releaseLevel: 1e7}); }} />Nobody
               </td>
             </tr>
             <tr>
@@ -246,11 +268,11 @@ export class NewItem extends Component<any, any> {
             </tr>
             <tr>
               <th>Sha1 Hash</th>
-              <td><input value={this.state.sha1hash || ""} onChange={(e) => { this.setState({sha1hash: e.target.value}); }} /></td>
+              <td><input style={{width: '100%'}} value={this.state.sha1hash || ""} onChange={(e) => { this.setState({sha1hash: e.target.value}); }} /></td>
             </tr>
             <tr>
               <th>Download URL</th>
-              <td><input value={this.state.downloadUrl || ""} onChange={(e) => { this.setState({downloadUrl: e.target.value}); }} /></td>
+              <td><input style={{width: '100%'}} value={this.state.downloadUrl || ""} onChange={(e) => { this.setState({downloadUrl: e.target.value}); }} /></td>
             </tr>
             <tr>
               <th>Release Notes English</th>
@@ -278,13 +300,18 @@ export class NewItem extends Component<any, any> {
             {/*</tr>*/}
             </tbody>
           </table>
-          <Button variant="contained" style={{backgroundColor: colors.red.hex, color: colors.white.hex, width: 500}}  onClick={() => { this.release() }}>
-            RELEASE
-          </Button><br /><br />
-          <Button variant="contained" style={{backgroundColor: colors.green.hex, color: colors.white.hex, width: 500}}  onClick={() => { this.props.close(); }}>
-            Cancel...
-          </Button>
         </div>
+        <Button variant="contained" style={{backgroundColor: colors.red.hex, color: colors.white.hex, width: 500}}  onClick={() => { this.release() }}>
+          RELEASE
+        </Button><br /><br />
+        <Button variant="contained" style={{backgroundColor: colors.green.hex, color: colors.white.hex, width: 500}}  onClick={() => { this.props.close(); }}>
+          Cancel...
+        </Button>
+        <style jsx>{`
+          table.newTableItem th {
+            text-align: right;
+          }
+        `}</style>
       </div>
     )
   }

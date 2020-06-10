@@ -1,11 +1,13 @@
 import {colors} from "../util/colors";
-import React from "react";
+import React, {useState} from "react";
 import {getDescriptiveHardwareString, getReleaseLevel, RELEASE_LEVELS, tableStyle} from "./FirmwareElement";
 import {Button} from "@material-ui/core";
 import {postData} from "../util/FetchUtil";
+import {checkSemVer} from "../util/HardwareVersions";
 
 
 export function FocusItem({allElements, id, type, close, refresh}) {
+
   let data : any = {};
   for (let i = 0; i < allElements.length; i++) {
     if (allElements[i]._id === id) {
@@ -13,9 +15,13 @@ export function FocusItem({allElements, id, type, close, refresh}) {
       break;
     }
   }
+  let [minimumFirmwareVersion, setMinimumFirmwareVersion] = useState(data.dependsOnFirmwareVersion)
   let releaseLevel = getReleaseLevel(data.releaseLevel)
   let backgroundColor = releaseLevel == RELEASE_LEVELS.NOBODY ? colors.csOrange.hex : releaseLevel == RELEASE_LEVELS.BETA ? colors.menuTextSelected.rgba(0.6) :'#ddd'
-
+  let getSemverColor = (val) : string => {
+    if (!val) { return colors.white.hex; }
+    return checkSemVer(val) ? colors.green.hex : colors.csOrange.hex;
+  }
   return (
     <div onClick={(e) => {
         e.stopPropagation();
@@ -39,7 +45,16 @@ export function FocusItem({allElements, id, type, close, refresh}) {
               <td>{data.version}</td>
               <td>{getDescriptiveHardwareString(data.supportedHardwareVersions)}</td>
               <td>{data.minimumAppVersion}</td>
-              {type === 'firmware' && <td>{data.dependsOnFirmwareVersion === null ? "null" : data.dependsOnFirmwareVersion}</td>}
+              {
+                type === 'firmware' &&
+                  <td><input value={minimumFirmwareVersion || ""} onChange={(e) => {
+                    if (e.target.value == "") {
+                      setMinimumFirmwareVersion(null)
+                      return
+                    }
+                    setMinimumFirmwareVersion(e.target.value)
+                  }} style={{backgroundColor: getSemverColor(minimumFirmwareVersion) }}/></td>
+              }
               <td>{data.dependsOnBootloaderVersion === null ? "null" : data.dependsOnBootloaderVersion}</td>
               <td>{getReleaseLevel(data.releaseLevel)}</td>
             </tr>
@@ -81,7 +96,12 @@ export function FocusItem({allElements, id, type, close, refresh}) {
         REVOKE
       </Button>
       <h1>DANGER</h1>
-      <Button variant="contained" style={{backgroundColor: colors.menuRed.hex, color: colors.white.hex}}  onClick={() => {
+      { type === 'firmware' && <Button variant="contained" style={{backgroundColor: colors.blue.hex, color: colors.white.hex, margin:20}}  onClick={() => {
+        editItem(data, type, minimumFirmwareVersion, close, refresh)
+      }}>
+        SAVE EDIT
+      </Button>}
+      <Button variant="contained" style={{backgroundColor: colors.menuRed.hex, color: colors.white.hex, margin:20}}  onClick={() => {
         deleteItem(data, type, close, refresh)
       }}>
         DELETE
@@ -94,6 +114,16 @@ function toLevel(data, type, level, refresh) {
   if (confirm("Are you absolutely sure you wish to set \n\n" + type + " v"+data.version + "\n\nTo level:" + getReleaseLevel(level) + "?")) {
     postData('http://localhost:3000/api/setReleaseLevel', {id: data._id, releaseLevel: level, type: type})
       .then(() => {
+        refresh()
+      })
+  }
+}
+
+function editItem(data, type, dependsOnFirmwareVersion, close, refresh) {
+  if (confirm("Save changes?")) {
+    postData('http://localhost:3000/api/setFirmwareRequirement', {id: data._id, type: type, dependsOnFirmwareVersion: dependsOnFirmwareVersion})
+      .then(() => {
+        close()
         refresh()
       })
   }
